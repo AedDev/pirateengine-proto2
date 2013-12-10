@@ -34,10 +34,10 @@ public abstract class PirateApp extends RenderWindow {
 		this.appName = appName;
 		
 		// Hier initialisieren wir unseren Objekt Manager.
-		// Er wird unsere Objekte verwalten und die Daten über sie bereit stellen.
+		// Er wird unsere Objekte verwalten und die Daten ï¿½ber sie bereit stellen.
 		this.objectManager = new ObjectManager(this);
 		
-		// Hinzufügen des Test Objektes
+		// Hinzufï¿½gen des Test Objektes
 		this.objectManager.registerObject(testObject);
 		
 		// JSFML muss zum Schluss initialisiert werden
@@ -48,13 +48,14 @@ public abstract class PirateApp extends RenderWindow {
 	 * Initialisierung vom JSFML
 	 */
 	private final void initJSFML() {
-		// Bevor wir unser Fenster anzeigen können, muss die maximale FPS Rate
+		// Bevor wir unser Fenster anzeigen kï¿½nnen, muss die maximale FPS Rate
 		// feststehen ... Warum komme ich erst jetzt darauf!? -.-" Oder doch nicht?
 		setFramerateLimit(30);
 		
 		Font font = new Font();
 		try {
-			font.loadFromStream(getClass().getResourceAsStream("/org/pirateengine/res/Arial.ttf"));
+			// This is case-sensitive on linux systems!
+			font.loadFromStream(getClass().getResourceAsStream("/org/pirateengine/res/ARIAL.TTF"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -79,7 +80,7 @@ public abstract class PirateApp extends RenderWindow {
 		 */
 		ContextSettings context = new ContextSettings(16);
 		
-		// Hier erstellen wir unser eigentliches Fenster (Für das Zeichnen der
+		// Hier erstellen wir unser eigentliches Fenster (Fï¿½r das Zeichnen der
 		// Objekte usw. - halt ein OpenGL Window ^^)
 		create(new VideoMode(800, 600), appName, RenderWindow.DEFAULT, context);
 		
@@ -119,7 +120,7 @@ public abstract class PirateApp extends RenderWindow {
 			this.objectManager.garbage();
 			
 			// Wenn alles erledigt ist, starten wir unseren Delta Timer neu und
-			// speichern die Zeit, die er für alles gebraucht hat, ab.
+			// speichern die Zeit, die er fï¿½r alles gebraucht hat, ab.
 			this.lastDelta = this.deltaClock.restart();
 			
 			this.deltaInfo.setString("Delta: " + String.valueOf(this.lastDelta.asSeconds()));
