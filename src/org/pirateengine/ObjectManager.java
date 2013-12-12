@@ -2,9 +2,8 @@ package org.pirateengine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-
-import org.jsfml.system.Vector2f;
 
 /**
  * Verwaltet die Objekte (was sonst ... ^^)
@@ -13,11 +12,11 @@ import org.jsfml.system.Vector2f;
  * 
  */
 public final class ObjectManager {
-	private PirateApp app;
+	private final PirateApp app;
 
-	private HashMap<String, PirateObject> pirateObjects = new HashMap<>();
-	private HashMap<String, Vector2f> objectPositions = new HashMap<>();
-	private List<String> destroyedObjects = new ArrayList<>();
+	private List<PirateObject> pirateObjects = new ArrayList<>();
+	private List<Integer> destroyedObjects = new ArrayList<>();
+	private HashMap<String, List<Integer>> objectTags = new HashMap<String, List<Integer>>();
 
 	/**
 	 * Initialisiert den {@link ObjectManager} mit der Referenz zur
@@ -32,7 +31,7 @@ public final class ObjectManager {
 
 	/**
 	 * Registriert ein neues {@link PirateObject} beim {@link ObjectManager}.
-	 * Sofern der Schlüssel des Objektes bereits registriert ist wird eine
+	 * Sofern der SchlÃ¼ssel des Objektes bereits registriert ist wird eine
 	 * {@link PirateException} geworfen.
 	 * 
 	 * @param object
@@ -45,66 +44,46 @@ public final class ObjectManager {
 			throw new NullPointerException("Cannot register 'null'");
 		}
 
-		// Das Zielobjekt muss über einen Schlüssel verfügen, der nicht leer
-		// sein
-		// darf.
-		if (object.getKey() == null || object.getKey().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Cannot register object without key");
-		}
-
-		// Jeder Schlüssel darf nur einmal registriert werden.
-		// (Ob das so gut ist? ...)
-		if (this.pirateObjects.containsKey(object.getKey())) {
-			throw new PirateException("Cannot add object '" + object.getKey()
-					+ "'. This key is already registered.");
-		}
-
-		// Wenn keine der vorherigen Fälle eingetreten ist, können wir das
+		// Wenn keine der vorherigen FÃ¤lle eingetreten ist, kÃ¶nnen wir das
 		// Objekt
 		// registrieren.
 		object.objectManager = this;
 		object.app = this.app;
-		this.pirateObjects.put(object.getKey(), object);
+
+		this.pirateObjects.add(object);
 	}
 
 	/**
-	 * Gibt ein {@link PirateObject} anhand seines Schlüssels zurück
+	 * Gibt eine {@link List} mit allen {@link PirateObject}s zurÃ¼ck, die den
+	 * gegebenen Tag besitzen.
 	 * 
-	 * @param key
-	 * @return
+	 * @param tag
+	 *            Der Tag, nach dem gesucht werden soll
+	 * @return Alle gefundenen {@link PirateObject}s
 	 */
-	public PirateObject getObject(String key) {
-		return this.pirateObjects.get(key);
-	}
+	public List<PirateObject> findByTag(String tag) {
+		List<PirateObject> objects = new ArrayList<>();
+		List<Integer> keys = this.objectTags.get(tag);
 
-	/**
-	 * Erzeugt ein Array aus den aktuell registrierten {@link PirateObject}s und
-	 * gibt diesen zurück.
-	 * 
-	 * @return
-	 */
-	public PirateObject[] getObjects() {
-		PirateObject[] objects = new PirateObject[this.pirateObjects.values()
-				.size()];
-		this.pirateObjects.values().toArray(objects);
+		for (int index = 0; index < keys.size(); index++) {
+			objects.add(this.pirateObjects.get(index));
+		}
 
 		return objects;
 	}
 
 	/**
-	 * Gibt die Position des Objektes mit dem gegebenen Schlüssel zurück.
+	 * Gibt alle aktuell registrierten {@link PirateObject}s als {@link List}
+	 * zurÃ¼ck.
 	 * 
-	 * @param key
-	 *            Der Schlüssel des Objektes
-	 * @return Die Position des Objektes
+	 * @return
 	 */
-	public Vector2f getPosition(String key) {
-		return this.objectPositions.get(key);
+	public List<PirateObject> getObjects() {
+		return this.pirateObjects;
 	}
 
 	/**
-	 * Gibt die zugrunde liegende {@link PirateApp} zurück.
+	 * Gibt die zugrunde liegende {@link PirateApp} zurÃ¼ck.
 	 * 
 	 * @return Die {@link PirateApp} halt ... -.-"
 	 */
@@ -113,32 +92,95 @@ public final class ObjectManager {
 	}
 
 	/**
-	 * Legt den Schlüssel des Objektes in die Liste der zu zerstörenden Objekte.
+	 * Sucht den Index des zu zerstÃ¶renden Objektes und markiert das Objekt mit
+	 * der gegebenen ID als zerstÃ¶rt. Es wird beim nÃ¤chsten Durchlauf des
+	 * Garbage Collectors des {@link ObjectManager}s zerstÃ¶rt.
 	 * 
-	 * @param key
-	 *            Der Schlüssel des zu zerstörenden Objektes.
+	 * @param object
+	 *            Das zu zerstÃ¶rende Objekt
 	 */
-	public void destroyObject(String key) {
-		if (key.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Cannot destroy an Object without key.");
-		}
-
-		this.destroyedObjects.add(key);
+	public void destroyObject(PirateObject object) {
+		Integer id = this.getID(object);
+		this.destroyObject(id);
 	}
 
 	/**
-	 * Räumt den {@link ObjectManager} auf, indem alle als zerstört markierten
+	 * Markiert das Objekt mit der gegebenen ID als zerstÃ¶rt. Es wird beim
+	 * nÃ¤chsten Durchlauf des Garbage Collectors des {@link ObjectManager}s
+	 * zerstÃ¶rt.
+	 * 
+	 * @param id
+	 *            Die ID des zu zerstÃ¶renden {@link PirateObject}s.
+	 */
+	public void destroyObject(Integer id) {
+		this.destroyedObjects.add(id);
+	}
+
+	/**
+	 * Liefert die ID eines {@link PirateObject}s. Achtung, diese Methode sollte
+	 * nach MÃ¶glichkeit umgangen werden, da sie bei grÃ¶ÃŸeren Applikationen viel
+	 * Rechenleistung beanspruchen kann.
+	 * 
+	 * @param object
+	 *            Das zu suchende {@link PirateObject}
+	 * @return Die ID des Objektes, oder <code>null</code>, wenn es nicht
+	 *         gefunden wurde
+	 */
+	public Integer getID(PirateObject object) {
+		for (int index = 0; index < this.pirateObjects.size(); index++) {
+			if (this.pirateObjects.get(index).equals(object)) {
+				return index;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * PrÃ¼ft, ob das {@link PirateObject} mit der angegebenen ID bereits
+	 * zerstÃ¶rt wurde.
+	 * 
+	 * @param id
+	 *            Die ID des zu prÃ¼fenden {@link PirateObject}
+	 * @return <code>true</code>, wenn es zerstÃ¶rt ist, <code>false</code> wenn
+	 *         nicht
+	 */
+	public boolean isDestroyed(Integer id) {
+		if (id < 0 || id > Integer.MAX_VALUE) {
+			throw new IllegalArgumentException(
+					"Cannot destroy an Object with invalid key.");
+		}
+
+		return (this.pirateObjects.get(id) == null);
+	}
+
+	/**
+	 * RÃ¤umt den {@link ObjectManager} auf, indem alle als zerstÃ¶rt markierten
 	 * Objekte entfernt werden.
 	 */
 	public void garbage() {
-		for (int index = 0; index < this.destroyedObjects.size(); index++) {
-			String key = this.destroyedObjects.get(index);
+		Iterator<Integer> toKill = this.destroyedObjects.iterator();
 
-			this.pirateObjects.remove(key);
-			this.objectPositions.remove(key);
+		// Entfernen der nicht mehr existenten IDs
+		while (toKill.hasNext()) {
+			Integer index = toKill.next();
 
+			this.pirateObjects.set(index, null);
 			this.destroyedObjects.remove(index);
+		}
+
+		// Entfernen der nicht mehr existenten IDs aus den Tag Listen
+		Iterator<String> tags = this.objectTags.keySet().iterator();
+		while (tags.hasNext()) {
+			String currentTag = tags.next();
+
+			Iterator<Integer> ids = this.objectTags.get(currentTag).iterator();
+			while (ids.hasNext()) {
+				Integer currentID = ids.next();
+				if (isDestroyed(currentID)) {
+					ids.remove();
+				}
+			}
 		}
 	}
 }

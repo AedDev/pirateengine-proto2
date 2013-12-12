@@ -10,8 +10,6 @@ public class TestObject extends PirateObject {
 	private CircleShape circle = new CircleShape(5f);
 	
 	public TestObject() {
-		setKey("TestObject");
-		
 		this.circle.setOutlineThickness(0f);
 		this.circle.setFillColor(Color.GREEN);
 	}

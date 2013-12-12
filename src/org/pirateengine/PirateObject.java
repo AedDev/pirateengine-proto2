@@ -3,23 +3,21 @@ package org.pirateengine;
 import org.jsfml.graphics.Drawable;
 import org.jsfml.graphics.RenderStates;
 import org.jsfml.graphics.RenderTarget;
+import org.jsfml.graphics.Transformable;
 import org.jsfml.system.Vector2f;
 
 /**
- * Repräsentiert ein zeichenbares Objekt. Diese Klasse muss geerbt werden.
+ * ReprÃ¤sentiert ein zeichenbares Objekt. Diese Klasse muss geerbt werden.
  * 
  * @author Morph <admin@mds-tv.de>
  * 
  */
 public abstract class PirateObject implements Drawable {
+	protected int ID;
+	
 	/**
-	 * Der Schlüssel des Objektes
-	 */
-	protected String key;
-
-	/**
-	 * Referenz zum Objekt Manager. Sie dient dazu die tatsächlichen Daten über
-	 * das Objekt abrufen zu können.
+	 * Referenz zum Objekt Manager. Sie dient dazu die tatsÃ¤chlichen Daten Ã¼ber
+	 * das Objekt abrufen zu kÃ¶nnen.
 	 */
 	protected ObjectManager objectManager;
 
@@ -29,46 +27,11 @@ public abstract class PirateObject implements Drawable {
 	protected PirateApp app;
 
 	/**
-	 * Gibt den Schlüssel dieses Objektes zurück
-	 * 
-	 * @return Der Schlüssel dieses Objektes.
-	 */
-	public String getKey() {
-		return this.key;
-	}
-
-	/**
-	 * Setzt den Schlüssel für dieses Objekt. Dieser sollte nur einmal gesetzt
-	 * werden!
-	 * 
-	 * @param key
-	 */
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	/**
-	 * Gibt die Position dieses Objektes zurück. Wenn dieses Objekt nicht beim
-	 * {@link ObjectManager} registriert ist, wird eine {@link PirateException}
-	 * geworfen.
-	 * 
-	 * @return Die Position des Objektes als {@link Vector2f}
-	 */
-	public Vector2f getPosition() {
-		if (this.objectManager == null) {
-			throw new PirateException("The object '" + key
-					+ "' was not registered to the ObjectManager.");
-		}
-
-		return this.objectManager.getPosition(this.key);
-	}
-
-	/**
-	 * Zerstört dieses Objekt. Es wird im {@link ObjectManager} der Schlüssel
-	 * dieses Objektes hinterlegt, damit er weiß, dass er dieses zerstören soll.
+	 * ZerstÃ¶rt dieses Objekt. Es wird im {@link ObjectManager} der SchlÃ¼ssel
+	 * dieses Objektes hinterlegt, damit er weiÃŸ, dass er dieses zerstÃ¶ren soll.
 	 */
 	public void destroy() {
-		this.objectManager.destroyObject(this.key);
+		this.objectManager.destroyObject(this);
 	}
 
 	@Override
