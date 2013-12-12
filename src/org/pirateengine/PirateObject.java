@@ -50,7 +50,7 @@ public abstract class PirateObject implements Drawable {
 
 	@Override
 	public final void draw(RenderTarget target, RenderStates states) {
-		this.render(target, states, this.app.lastDelta.asSeconds());
+		this.render(target, states, this.app.getDelta().asSeconds());
 	}
 
 	/**

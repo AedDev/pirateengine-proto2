@@ -23,13 +23,20 @@ public abstract class PirateApp extends RenderWindow {
 	protected final String appName;
 	protected final ObjectManager objectManager;
 
+	// Delta Counter
 	private Clock deltaClock;
-	public Time lastDelta = org.jsfml.system.Time.ZERO;
+	private Time lastDelta = Time.ZERO;
 
 	// Debug Objects
 	private Text deltaInfo = new Text();
 	private Text objectIdCounter = new Text();
 	private Text objectCount = new Text();
+	private Text fpsCountView = new Text();
+	
+	// FPS Counter
+	private Clock fpsClock;
+	private int fpsCount = 0;
+	private int lastFps  = 0;
 
 	public PirateApp(String appName) {
 		// Als erstes brauchen wir unseren Applikations ... namen ... Klingt
@@ -49,11 +56,6 @@ public abstract class PirateApp extends RenderWindow {
 	 * Initialisierung vom JSFML
 	 */
 	private final void initJSFML() {
-		// Bevor wir unser Fenster anzeigen können, muss die maximale FPS Rate
-		// feststehen ... Warum komme ich erst jetzt darauf!? -.-" Oder doch
-		// nicht?
-		setFramerateLimit(30);
-
 		Font font = new Font();
 		try {
 			// This is case-sensitive on linux systems!
@@ -66,14 +68,23 @@ public abstract class PirateApp extends RenderWindow {
 		this.deltaInfo.setColor(Color.BLUE);
 		this.deltaInfo.setFont(font);
 		this.deltaInfo.setPosition(10.0f, 10.0f);
+		this.deltaInfo.setCharacterSize(12);
 
 		this.objectIdCounter.setColor(Color.CYAN);
 		this.objectIdCounter.setFont(font);
-		this.objectIdCounter.setPosition(10.0f, 40.0f);
+		this.objectIdCounter.setPosition(10.0f, 25.0f);
+		this.objectIdCounter.setCharacterSize(12);
 
 		this.objectCount.setColor(Color.WHITE);
 		this.objectCount.setFont(font);
-		this.objectCount.setPosition(10.0f, 70.0f);
+		this.objectCount.setPosition(10.0f, 40.0f);
+		this.objectCount.setCharacterSize(12);
+		
+		this.fpsCountView.setColor(Color.GREEN);
+		this.fpsCountView.setFont(font);
+		this.fpsCountView.setPosition(10.0f, 55.0f);
+		this.fpsCountView.setCharacterSize(12);
+		this.fpsCountView.setString("FPS: 0");
 
 		// Anonymer Thread
 		new Thread(new Runnable() {
@@ -82,6 +93,22 @@ public abstract class PirateApp extends RenderWindow {
 				appLoop();
 			}
 		}).start();
+	}
+	
+	/**
+	 * Gibt den letzten Delta Wert als {@link Time} zurück.
+	 * @return Der letzte Delta Wert
+	 */
+	public Time getDelta() {
+		return this.lastDelta;
+	}
+	
+	/**
+	 * Gibt die letzte gemessene FPS Rate zurück
+	 * @return Letzte gemessene FPS Rate
+	 */
+	public int getFPS() {
+		return this.lastFps;
 	}
 
 	private final void appLoop() {
@@ -97,6 +124,7 @@ public abstract class PirateApp extends RenderWindow {
 		create(new VideoMode(800, 600), appName, RenderWindow.DEFAULT, context);
 
 		this.deltaClock = new Clock();
+		this.fpsClock = new Clock();
 		while (isOpen()) {
 			// UPDATE STUFF
 
@@ -118,6 +146,7 @@ public abstract class PirateApp extends RenderWindow {
 			draw(this.deltaInfo);
 			draw(this.objectIdCounter);
 			draw(this.objectCount);
+			draw(this.fpsCountView);
 
 			display();
 
@@ -143,6 +172,18 @@ public abstract class PirateApp extends RenderWindow {
 					+ this.objectManager.getIdCounter());
 			this.objectCount.setString("Objects: "
 					+ this.objectManager.getObjects().size());
+			
+			// Hier holen wir uns noch die aktuelle FPS Rate
+			if (this.fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
+				this.lastFps = this.fpsCount;
+				this.fpsCount = 0;
+				
+				this.fpsClock.restart();
+				
+				this.fpsCountView.setString("FPS: " + this.lastFps);
+			} else {
+				this.fpsCount++;
+			}
 			
 			// Wenn alles erledigt ist, starten wir unseren Delta Timer neu und
 			// speichern die Zeit, die er für alles gebraucht hat, ab.
