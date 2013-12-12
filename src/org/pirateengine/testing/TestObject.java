@@ -8,10 +8,9 @@ import org.pirateengine.PirateObject;
 
 public class TestObject extends PirateObject {
 	private CircleShape circle = new CircleShape(5f);
+	private float speed = 200f;
 	
 	public TestObject() {
-		setKey("TestObject");
-		
 		this.circle.setOutlineThickness(0f);
 		this.circle.setFillColor(Color.GREEN);
 	}
@@ -19,9 +18,14 @@ public class TestObject extends PirateObject {
 	@Override
 	public void render(RenderTarget target, RenderStates states, float delta) {
 		// Bewegen des Objektes mithilfe des Delta Wertes, um Ruckler zu vermeiden
-		this.circle.move(50f * delta, 50f * delta);
+		this.circle.move(speed * delta, speed * delta);
 		
 		// Zeichnen des Objektes
 		target.draw(circle);
+		
+		if (this.circle.getPosition().x > this.app.getSize().x
+				|| this.circle.getPosition().y > this.app.getSize().y) {
+			this.destroy();
+		}
 	}
 }
