@@ -13,6 +13,7 @@ import java.util.List;
  */
 public final class ObjectManager {
 	private final PirateApp app;
+	private int idCounter = 0;
 
 	private List<PirateObject> pirateObjects = new ArrayList<>();
 	private List<Integer> destroyedObjects = new ArrayList<>();
@@ -51,6 +52,9 @@ public final class ObjectManager {
 		object.app = this.app;
 
 		this.pirateObjects.add(object);
+
+		// Wenn das Objekt registriert ist, bekommt es seine ID
+		object.ID = ++idCounter;
 	}
 
 	/**
@@ -83,6 +87,29 @@ public final class ObjectManager {
 	}
 
 	/**
+	 * Gibt ein {@link PirateObject} anhand seiner ID zurück. Wenn das Objekt
+	 * nicht existiert wird <code>null</code> zurück gegeben.
+	 * 
+	 * @param objectId
+	 *            Die ID des zu suchenden Objektes.
+	 * @return Das {@link PirateObject}, welches der gegebenen ID zugeordenet
+	 *         ist, oder <code>null</code> wenn das gesuchte Objekt nicht
+	 *         existiert.
+	 */
+	public PirateObject getById(int objectId) {
+		Iterator<PirateObject> objects = this.pirateObjects.iterator();
+
+		while (objects.hasNext()) {
+			final PirateObject object = objects.next();
+			if (object.ID == objectId) {
+				return object;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Gibt die zugrunde liegende {@link PirateApp} zurück.
 	 * 
 	 * @return Die {@link PirateApp} halt ... -.-"
@@ -100,8 +127,7 @@ public final class ObjectManager {
 	 *            Das zu zerstörende Objekt
 	 */
 	public void destroyObject(PirateObject object) {
-		int id = this.getID(object);
-		this.destroyObject(id);
+		this.destroyObject(object.ID);
 	}
 
 	/**
@@ -126,8 +152,7 @@ public final class ObjectManager {
 	 *         <code>false</code> wenn nicht.
 	 */
 	public boolean isDestroyed(PirateObject object) {
-		int id = this.getID(object);
-		return this.isDestroyed(id);
+		return this.isDestroyed(object.ID);
 	}
 
 	/**
@@ -141,26 +166,6 @@ public final class ObjectManager {
 	 */
 	public boolean isDestroyed(int id) {
 		return this.destroyedObjects.contains(id);
-	}
-
-	/**
-	 * Liefert die ID eines {@link PirateObject}s. Achtung, diese Methode sollte
-	 * nach Möglichkeit umgangen werden, da sie bei größeren Applikationen viel
-	 * Rechenleistung beanspruchen kann.
-	 * 
-	 * @param object
-	 *            Das zu suchende {@link PirateObject}
-	 * @return Die ID des Objektes, oder <code>null</code>, wenn es nicht
-	 *         gefunden wurde
-	 */
-	public Integer getID(PirateObject object) {
-		for (int index = 0; index < this.pirateObjects.size(); index++) {
-			if (this.pirateObjects.get(index).equals(object)) {
-				return index;
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -182,18 +187,27 @@ public final class ObjectManager {
 	}
 
 	/**
+	 * Führt alle relevanten Updates für den {@link ObjectManager} durch
+	 */
+	public void update() {
+		// Der Garbage Collector des ObjectManagers
+		this.garbage();
+	}
+
+	/**
 	 * Räumt den {@link ObjectManager} auf, indem alle als zerstört markierten
 	 * Objekte entfernt werden.
 	 */
-	public void garbage() {
+	private void garbage() {
 		Iterator<Integer> toKill = this.destroyedObjects.iterator();
 
 		// Entfernen der nicht mehr existenten IDs
 		while (toKill.hasNext()) {
-			Integer index = toKill.next();
-
-			this.pirateObjects.set(index, null);
-			this.destroyedObjects.remove(index);
+			int id = toKill.next();
+			PirateObject objectToKill = this.getById(id);
+			
+			this.pirateObjects.remove(objectToKill);
+			toKill.remove();
 		}
 
 		// Entfernen der nicht mehr existenten IDs aus den Tag Listen
@@ -209,5 +223,15 @@ public final class ObjectManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Gibt den aktuellen Stand des ID Counters zurück. Dies dient nur zu Debug
+	 * Zwecken.
+	 * 
+	 * @return Den aktuellen Stand des ID Counters.
+	 */
+	public int getIdCounter() {
+		return this.idCounter;
 	}
 }
