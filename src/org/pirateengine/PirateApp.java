@@ -1,6 +1,7 @@
 package org.pirateengine;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.jsfml.graphics.Color;
 import org.jsfml.graphics.Font;
@@ -91,8 +92,11 @@ public abstract class PirateApp extends RenderWindow {
 			clear(Color.BLACK);
 			
 			// RENDER STUFF
-			for (PirateObject object : this.objectManager.getObjects()) {
-				draw(object);
+			// TODO Gibt er hier eine performantere Variante?
+			Iterator<PirateObject> objects = this.objectManager.getObjects().iterator();
+			while (objects.hasNext()) {
+				final PirateObject currentObject = objects.next();
+				
 			}
 			
 			// Zuletzt zeichnen wir den Delta Wert, damit dieser wie ein Overlay

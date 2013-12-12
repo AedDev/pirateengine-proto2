@@ -100,7 +100,7 @@ public final class ObjectManager {
 	 *            Das zu zerstörende Objekt
 	 */
 	public void destroyObject(PirateObject object) {
-		Integer id = this.getID(object);
+		int id = this.getID(object);
 		this.destroyObject(id);
 	}
 
@@ -112,8 +112,35 @@ public final class ObjectManager {
 	 * @param id
 	 *            Die ID des zu zerstörenden {@link PirateObject}s.
 	 */
-	public void destroyObject(Integer id) {
+	public void destroyObject(int id) {
 		this.destroyedObjects.add(id);
+	}
+
+	/**
+	 * Prüft, ob das angegebene {@link PirateObject} als zerstört definiert
+	 * wurde.
+	 * 
+	 * @param object
+	 *            Das zu prüfende {@link PirateObject}.
+	 * @return <code>true</code>, wenn es als zerstört definiert ist,
+	 *         <code>false</code> wenn nicht.
+	 */
+	public boolean isDestroyed(PirateObject object) {
+		int id = this.getID(object);
+		return this.isDestroyed(id);
+	}
+
+	/**
+	 * Prüft, ob das {@link PirateObject} mit der angegebenen ID als zerstört
+	 * definiert wurde.
+	 * 
+	 * @param id
+	 *            Die zu prüfende Objekt ID
+	 * @return <code>true</code>, wenn es als zerstört definiert ist,
+	 *         <code>false</code> wenn nicht.
+	 */
+	public boolean isDestroyed(int id) {
+		return this.destroyedObjects.contains(id);
 	}
 
 	/**
