@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.jsfml.graphics.Color;
+import org.jsfml.graphics.Drawable;
 import org.jsfml.graphics.Font;
+import org.jsfml.graphics.RenderStates;
+import org.jsfml.graphics.RenderTarget;
 import org.jsfml.graphics.RenderWindow;
 import org.jsfml.graphics.Text;
 import org.jsfml.system.Clock;
@@ -48,9 +51,23 @@ public abstract class PirateApp extends RenderWindow {
 		// stellen.
 		this.objectManager = new ObjectManager(this);
 
+		this.preInit();
+		
 		// JSFML muss zum Schluss initialisiert werden
 		this.initJSFML();
+		
+		this.postInit();
 	}
+	
+	/**
+	 * Wird VOR der Initialisierung von JSFML aufgerufen.
+	 */
+	public void preInit() {}
+	
+	/**
+	 * Wird NACH der Initialisierung von JSFML aufgerufen.
+	 */
+	public void postInit() {}
 
 	/**
 	 * Initialisierung vom JSFML
@@ -129,6 +146,14 @@ public abstract class PirateApp extends RenderWindow {
 			// UPDATE STUFF
 
 			clear(Color.BLACK);
+			
+			// RENDER MAIN CLASS
+			draw(new Drawable() {
+				@Override
+				public void draw(RenderTarget target, RenderStates states) {
+					render(target, states, getDelta().asSeconds());
+				}
+			});
 
 			// RENDER STUFF
 			// TODO Gibt er hier eine performantere Variante?
@@ -190,4 +215,7 @@ public abstract class PirateApp extends RenderWindow {
 			this.lastDelta = this.deltaClock.restart();
 		}
 	}
+	
+	public abstract void render(RenderTarget target, RenderStates states,
+			float delta);
 }
