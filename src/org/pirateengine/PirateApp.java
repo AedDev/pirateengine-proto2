@@ -168,9 +168,7 @@ public abstract class PirateApp extends RenderWindow {
 			});
 
 			// RENDER STUFF
-			long renderTime = System.currentTimeMillis();
-			Iterator<PirateObject> objects = this.objectManager.getObjects()
-					.iterator();
+			Iterator<PirateObject> objects = this.objectManager.getObjects().iterator();
 			while (objects.hasNext()) {
 				final PirateObject currentObject = objects.next();
 				if (!currentObject.isDestroyed()) {
@@ -178,8 +176,6 @@ public abstract class PirateApp extends RenderWindow {
 				}
 			}
 			
-			System.out.println("Time to render: " + (System.currentTimeMillis() - renderTime) + "ms");
-
 			// TODO DEBUG
 			// Zuletzt zeichnen wir den Delta Wert, damit dieser wie ein Overlay
 			// immer oben liegt. (Overlay -> Oben liegt ... Mja^^)
@@ -227,6 +223,5 @@ public abstract class PirateApp extends RenderWindow {
 		}
 	}
 
-	public abstract void render(RenderTarget target, RenderStates states,
-			float delta);
+	public void render(RenderTarget target, RenderStates states, float delta) {}
 }
