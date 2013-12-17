@@ -23,7 +23,7 @@ public class TestObject extends PirateObject {
 		// this.circle.move(speed * delta, speed * delta);
 		
 		Vector2i circlePos = new Vector2i(this.circle.getPosition());
-		Vector2i mousePos = Mouse.getPosition(app);
+		Vector2i mousePos = Mouse.getPosition(getApp());
 		
 		if (circlePos.x > mousePos.x) {
 			circle.move(-speed * delta, 0);
@@ -40,8 +40,8 @@ public class TestObject extends PirateObject {
 		// Zeichnen des Objektes
 		target.draw(circle);
 		
-		if (this.circle.getPosition().x > this.app.getSize().x
-				|| this.circle.getPosition().y > this.app.getSize().y
+		if (this.circle.getPosition().x > this.getApp().getSize().x
+				|| this.circle.getPosition().y > this.getApp().getSize().y
 				|| this.circle.getPosition().x < 0f
 				|| this.circle.getPosition().y < 0f) {
 			this.destroy();

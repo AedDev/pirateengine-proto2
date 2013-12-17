@@ -11,18 +11,56 @@ import org.jsfml.graphics.RenderTarget;
  * 
  */
 public abstract class PirateObject implements Drawable {
-	protected int ID;
+	/**
+	 * Die eindeutige ID dieses Objektes
+	 */
+	private int id;
+
+	/**
+	 * Die ID des Elternobjektes. 0 bedeutet, dass dieses Objekt keinem Eltern
+	 * Objekt zugeordnet ist. (Default)
+	 */
+	private int parentId = 0;
 
 	/**
 	 * Referenz zum Objekt Manager. Sie dient dazu die tatsächlichen Daten über
 	 * das Objekt abrufen zu können.
 	 */
-	protected ObjectManager objectManager;
+	private ObjectManager objectManager;
 
 	/**
 	 * Referenz zur zugrunde liegenden {@link PirateApp}
 	 */
-	protected PirateApp app;
+	private PirateApp app;
+
+	/**
+	 * Initialisiert dieses {@link PirateObject} Diese Methode darf nur einmal
+	 * vom {@link ObjectManager} aufgerufen werden. Sollte das
+	 * {@link PirateObject} schon initialisiert sein, wird eine
+	 * {@link PirateException} geworfen.
+	 * 
+	 * @param id
+	 *            Die ID für dieses Objekt
+	 * @param parentId
+	 *            Die ID des Elternobjektes für dieses Objekt
+	 * @param objMgr
+	 *            Die Referenz zum globalen {@link ObjectManager}
+	 * @param app
+	 *            Die Referenz zur Hauptklasse dieser Anwendung
+	 */
+	public void preInit(int id, int parentId, ObjectManager objMgr,
+			PirateApp app) {
+		// Wenn der ObjectManager null ist, dann ist dieses Objekt noch nicht
+		// initialisiert
+		if (this.objectManager == null) {
+			this.id = id;
+			this.parentId = parentId;
+			this.objectManager = objMgr;
+			this.app = app;
+		} else {
+			throw new PirateException("This object was already initialized.");
+		}
+	}
 
 	/**
 	 * Zerstört dieses Objekt. Es wird im {@link ObjectManager} der Schlüssel
@@ -45,7 +83,54 @@ public abstract class PirateObject implements Drawable {
 	 *         <code>false</code> wenn nicht.
 	 */
 	public boolean isDestroyed() {
-		return this.objectManager.isDestroyed(this);
+		return this.objectManager.hasDestroyedFlag(this);
+	}
+
+	/**
+	 * Gibt die eindeutige ID dieses Objektes zurück.
+	 * 
+	 * @return Die eindeutige ID dieses Objektes.
+	 */
+	public int getId() {
+		return this.id;
+	}
+
+	/**
+	 * Gibt die ID des Elternobjektes zurück. 0 bedeutet, dass dieses Objekt
+	 * keinem Eltern Objekt zugeordnet ist. (Default)
+	 * 
+	 * @return Die ID des Elternobjektes.
+	 */
+	public int getParentId() {
+		return this.parentId;
+	}
+
+	/**
+	 * Setzt die ID des Elternobjektes für dieses Objekt neu.
+	 * 
+	 * @param id
+	 *            Die ID des Elternobjektes.
+	 */
+	public void setParentId(int id) {
+		this.parentId = id;
+	}
+
+	/**
+	 * Gibt die Instanz des globalen {@link ObjectManager} zurück.
+	 * 
+	 * @return Der {@link ObjectManager}.
+	 */
+	public ObjectManager getObjectManager() {
+		return this.objectManager;
+	}
+
+	/**
+	 * Gibt die Referenz zur Hauptklasse dieser Anwendung zurück.
+	 * 
+	 * @return Referenz zur Hauptklasse dieser Anwendung.
+	 */
+	public PirateApp getApp() {
+		return this.app;
 	}
 
 	@Override

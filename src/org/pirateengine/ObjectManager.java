@@ -15,8 +15,19 @@ public final class ObjectManager {
 	private final PirateApp app;
 	private int idCounter = 0;
 
+	/**
+	 * Die {@link PirateObject}s
+	 */
 	private List<PirateObject> pirateObjects = new ArrayList<>();
+
+	/**
+	 * Temporäre Liste der zu zerstörenden Objekte
+	 */
 	private List<Integer> destroyedObjects = new ArrayList<>();
+
+	/**
+	 * Objekt Tags
+	 */
 	private HashMap<String, List<Integer>> objectTags = new HashMap<String, List<Integer>>();
 
 	/**
@@ -32,12 +43,9 @@ public final class ObjectManager {
 
 	/**
 	 * Registriert ein neues {@link PirateObject} beim {@link ObjectManager}.
-	 * Sofern der Schlüssel des Objektes bereits registriert ist wird eine
-	 * {@link PirateException} geworfen.
 	 * 
 	 * @param object
 	 *            Das zu registrierende {@link PirateObject}
-	 * @throws PirateException
 	 */
 	public void registerObject(PirateObject object) {
 		// Das Zielobjekt darf nicht null sein
@@ -45,16 +53,10 @@ public final class ObjectManager {
 			throw new NullPointerException("Cannot register 'null'");
 		}
 
-		// Wenn keine der vorherigen Fälle eingetreten ist, können wir das
-		// Objekt
-		// registrieren.
-		object.objectManager = this;
-		object.app = this.app;
-
+		// Das Objekt wird initialisiert und in die Liste der Objekte
+		// aufgenommen
+		object.preInit(++idCounter, 0, this, this.app);
 		this.pirateObjects.add(object);
-
-		// Wenn das Objekt registriert ist, bekommt es seine ID
-		object.ID = ++idCounter;
 	}
 
 	/**
@@ -101,7 +103,7 @@ public final class ObjectManager {
 
 		while (objects.hasNext()) {
 			final PirateObject object = objects.next();
-			if (object.ID == objectId) {
+			if (object.getId() == objectId) {
 				return object;
 			}
 		}
@@ -127,7 +129,7 @@ public final class ObjectManager {
 	 *            Das zu zerstörende Objekt
 	 */
 	public void destroyObject(PirateObject object) {
-		this.destroyObject(object.ID);
+		this.destroyObject(object.getId());
 	}
 
 	/**
@@ -151,8 +153,8 @@ public final class ObjectManager {
 	 * @return <code>true</code>, wenn es als zerstört definiert ist,
 	 *         <code>false</code> wenn nicht.
 	 */
-	public boolean isDestroyed(PirateObject object) {
-		return this.isDestroyed(object.ID);
+	public boolean hasDestroyedFlag(PirateObject object) {
+		return this.hasDestroyedFlag(object.getId());
 	}
 
 	/**
@@ -164,7 +166,7 @@ public final class ObjectManager {
 	 * @return <code>true</code>, wenn es als zerstört definiert ist,
 	 *         <code>false</code> wenn nicht.
 	 */
-	public boolean isDestroyed(int id) {
+	public boolean hasDestroyedFlag(int id) {
 		return this.destroyedObjects.contains(id);
 	}
 
@@ -183,7 +185,7 @@ public final class ObjectManager {
 					"Cannot destroy an Object with invalid key.");
 		}
 
-		return (this.pirateObjects.get(id) == null);
+		return (this.getById(id) == null);
 	}
 
 	/**
@@ -205,7 +207,7 @@ public final class ObjectManager {
 		while (toKill.hasNext()) {
 			int id = toKill.next();
 			PirateObject objectToKill = this.getById(id);
-			
+
 			this.pirateObjects.remove(objectToKill);
 			toKill.remove();
 		}
@@ -218,7 +220,7 @@ public final class ObjectManager {
 			Iterator<Integer> ids = this.objectTags.get(currentTag).iterator();
 			while (ids.hasNext()) {
 				Integer currentID = ids.next();
-				if (isDestroyed(currentID)) {
+				if (hasDestroyedFlag(currentID)) {
 					ids.remove();
 				}
 			}

@@ -15,6 +15,7 @@ import org.jsfml.system.Time;
 import org.jsfml.window.ContextSettings;
 import org.jsfml.window.VideoMode;
 import org.jsfml.window.event.Event;
+import org.jsfml.window.event.Event.Type;
 
 /**
  * Piraten Basis Klasse :P
@@ -35,11 +36,11 @@ public abstract class PirateApp extends RenderWindow {
 	private Text objectIdCounter = new Text();
 	private Text objectCount = new Text();
 	private Text fpsCountView = new Text();
-	
+
 	// FPS Counter
 	private Clock fpsClock;
 	private int fpsCount = 0;
-	private int lastFps  = 0;
+	private int lastFps = 0;
 
 	public PirateApp(String appName) {
 		// Als erstes brauchen wir unseren Applikations ... namen ... Klingt
@@ -52,27 +53,38 @@ public abstract class PirateApp extends RenderWindow {
 		this.objectManager = new ObjectManager(this);
 
 		this.preInit();
-		
+
 		// JSFML muss zum Schluss initialisiert werden
 		this.initJSFML();
-		
+
 		this.postInit();
 	}
-	
+
 	/**
 	 * Wird VOR der Initialisierung von JSFML aufgerufen.
 	 */
-	public void preInit() {}
-	
+	public void preInit() {
+	}
+
 	/**
 	 * Wird NACH der Initialisierung von JSFML aufgerufen.
 	 */
-	public void postInit() {}
+	public void postInit() {
+	}
+
+	/**
+	 * Definiert, was beim Schließen der Anwendung passieren soll. Diese Methode
+	 * kann überschrieben werden.
+	 */
+	public void onExit() {
+		this.close();
+	}
 
 	/**
 	 * Initialisierung vom JSFML
 	 */
 	private final void initJSFML() {
+		// =============================================================================
 		Font font = new Font();
 		try {
 			// This is case-sensitive on linux systems!
@@ -81,7 +93,6 @@ public abstract class PirateApp extends RenderWindow {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		this.deltaInfo.setColor(Color.BLUE);
 		this.deltaInfo.setFont(font);
 		this.deltaInfo.setPosition(10.0f, 10.0f);
@@ -96,12 +107,13 @@ public abstract class PirateApp extends RenderWindow {
 		this.objectCount.setFont(font);
 		this.objectCount.setPosition(10.0f, 40.0f);
 		this.objectCount.setCharacterSize(12);
-		
+
 		this.fpsCountView.setColor(Color.GREEN);
 		this.fpsCountView.setFont(font);
 		this.fpsCountView.setPosition(10.0f, 55.0f);
 		this.fpsCountView.setCharacterSize(12);
 		this.fpsCountView.setString("FPS: 0");
+		// =============================================================================
 
 		// Anonymer Thread
 		new Thread(new Runnable() {
@@ -111,17 +123,19 @@ public abstract class PirateApp extends RenderWindow {
 			}
 		}).start();
 	}
-	
+
 	/**
 	 * Gibt den letzten Delta Wert als {@link Time} zurück.
+	 * 
 	 * @return Der letzte Delta Wert
 	 */
 	public Time getDelta() {
 		return this.lastDelta;
 	}
-	
+
 	/**
 	 * Gibt die letzte gemessene FPS Rate zurück
+	 * 
 	 * @return Letzte gemessene FPS Rate
 	 */
 	public int getFPS() {
@@ -134,7 +148,7 @@ public abstract class PirateApp extends RenderWindow {
 		 * brauchen wir die ContextSettings. Wir sprechen hier direkt den OpenGL
 		 * Kontext an.
 		 */
-		ContextSettings context = new ContextSettings(16);
+		ContextSettings context = new ContextSettings();
 
 		// Hier erstellen wir unser eigentliches Fenster (Für das Zeichnen der
 		// Objekte usw. - halt ein OpenGL Window ^^)
@@ -143,10 +157,8 @@ public abstract class PirateApp extends RenderWindow {
 		this.deltaClock = new Clock();
 		this.fpsClock = new Clock();
 		while (isOpen()) {
-			// UPDATE STUFF
-
 			clear(Color.BLACK);
-			
+
 			// RENDER MAIN CLASS
 			draw(new Drawable() {
 				@Override
@@ -166,6 +178,7 @@ public abstract class PirateApp extends RenderWindow {
 				}
 			}
 
+			// TODO DEBUG
 			// Zuletzt zeichnen wir den Delta Wert, damit dieser wie ein Overlay
 			// immer oben liegt. (Overlay -> Oben liegt ... Mja^^)
 			draw(this.deltaInfo);
@@ -175,20 +188,6 @@ public abstract class PirateApp extends RenderWindow {
 
 			display();
 
-			// Events
-			for (Event evt : pollEvents()) {
-				switch (evt.type) {
-				case CLOSED: {
-					close();
-					System.exit(0);
-					break;
-				}
-				default: {
-					break;
-				}
-				}
-			}
-			
 			// Jetzt darf sich der ObjectManager erstmal neu organisieren
 			this.objectManager.update();
 
@@ -197,25 +196,35 @@ public abstract class PirateApp extends RenderWindow {
 					+ this.objectManager.getIdCounter());
 			this.objectCount.setString("Objects: "
 					+ this.objectManager.getObjects().size());
-			
+
 			// Hier holen wir uns noch die aktuelle FPS Rate
 			if (this.fpsClock.getElapsedTime().asSeconds() >= 1.0f) {
 				this.lastFps = this.fpsCount;
 				this.fpsCount = 0;
-				
+
 				this.fpsClock.restart();
-				
+
 				this.fpsCountView.setString("FPS: " + this.lastFps);
 			} else {
 				this.fpsCount++;
 			}
-			
+
 			// Wenn alles erledigt ist, starten wir unseren Delta Timer neu und
 			// speichern die Zeit, die er für alles gebraucht hat, ab.
 			this.lastDelta = this.deltaClock.restart();
+
+			// Hier fangen wir noch das EXIT Event ab, damit das Fenster auch
+			// geschlossen werden kann.
+			Iterator<Event> events = this.pollEvents().iterator();
+			while (events.hasNext()) {
+				Event currentEvent = events.next();
+				if (currentEvent.type == Type.CLOSED) {
+					this.onExit();
+				}
+			}
 		}
 	}
-	
+
 	public abstract void render(RenderTarget target, RenderStates states,
 			float delta);
 }
