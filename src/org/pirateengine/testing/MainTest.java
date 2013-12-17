@@ -24,6 +24,10 @@ public class MainTest extends PirateApp {
 		if (Keyboard.isKeyPressed(Key.ESCAPE)) {
 			this.close();
 		}
+		
+		if (Keyboard.isKeyPressed(Key.S)) {
+			this.objectManager.registerObject(new TestObject());
+		}
 	}
 
 	public static void main(String[] args) {
