@@ -74,8 +74,6 @@ public abstract class PirateObject implements Drawable {
 		this.objectManager.destroyObject(this);
 	}
 
-	// TODO Diese Methode kann viel Rechenleistung beanspruchen. Hier sollte
-	// eine Lösung gefunden werden.
 	/**
 	 * Prüft, ob dieses Objekt als zerstört definiert wurde.
 	 * 
@@ -106,6 +104,17 @@ public abstract class PirateObject implements Drawable {
 	}
 
 	/**
+	 * Gibt das Elternobjekt zurück, welches diesem Objekt zugeordnet ist.
+	 * Sofern dieses Objekt kein Elternobjekt hat, wird <code>null</code>
+	 * zurückgegeben.
+	 * 
+	 * @return Das Elternobjekt, sofern vorhanden.
+	 */
+	public PirateObject getParentObject() {
+		return this.objectManager.getById(this.id);
+	}
+
+	/**
 	 * Setzt die ID des Elternobjektes für dieses Objekt neu.
 	 * 
 	 * @param id
@@ -133,6 +142,27 @@ public abstract class PirateObject implements Drawable {
 		return this.app;
 	}
 
+	/**
+	 * Legt fest, ob dieses Objekt mit anderen kollidierbaren Objekten
+	 * kollidieren soll.
+	 * 
+	 * @param isCollidable
+	 *            <code>true</code>, wenn dieses Objekt kollidierbar sein soll,
+	 *            <code>false</code> wenn nicht.
+	 */
+	public void setCollidable(boolean isCollidable) {
+		this.objectManager.setCollidable(this.id, isCollidable);
+	}
+
+	/**
+	 * Gibt zurück, ob dieses Objekt mit anderen Objekten kollidieren kann.
+	 * 
+	 * @return
+	 */
+	public boolean isCollidable() {
+		return this.objectManager.isCollidable(this.id);
+	}
+
 	@Override
 	public final void draw(RenderTarget target, RenderStates states) {
 		this.render(target, states, this.app.getDelta().asSeconds());
@@ -149,4 +179,15 @@ public abstract class PirateObject implements Drawable {
 	 */
 	public abstract void render(RenderTarget target, RenderStates states,
 			float delta);
+
+	/**
+	 * Wenn dieses {@link PirateObject} mit einem anderen kollidierbaren
+	 * {@link PirateObject} kollidiert, wird diese Methode aufgrunfen.
+	 * 
+	 * @param other
+	 *            Das {@link PirateObject}, mit welchem die Kollision
+	 *            stattgefunden hat.
+	 */
+	public void onCollision(PirateObject other) {
+	}
 }

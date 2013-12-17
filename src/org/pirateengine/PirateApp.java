@@ -168,7 +168,7 @@ public abstract class PirateApp extends RenderWindow {
 			});
 
 			// RENDER STUFF
-			// TODO Gibt er hier eine performantere Variante?
+			long renderTime = System.currentTimeMillis();
 			Iterator<PirateObject> objects = this.objectManager.getObjects()
 					.iterator();
 			while (objects.hasNext()) {
@@ -177,6 +177,8 @@ public abstract class PirateApp extends RenderWindow {
 					draw(currentObject);
 				}
 			}
+			
+			System.out.println("Time to render: " + (System.currentTimeMillis() - renderTime) + "ms");
 
 			// TODO DEBUG
 			// Zuletzt zeichnen wir den Delta Wert, damit dieser wie ein Overlay

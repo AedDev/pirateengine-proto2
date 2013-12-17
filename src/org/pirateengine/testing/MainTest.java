@@ -2,6 +2,8 @@ package org.pirateengine.testing;
 
 import org.jsfml.graphics.RenderStates;
 import org.jsfml.graphics.RenderTarget;
+import org.jsfml.window.Keyboard;
+import org.jsfml.window.Keyboard.Key;
 import org.pirateengine.PirateApp;
 
 public class MainTest extends PirateApp {
@@ -18,7 +20,11 @@ public class MainTest extends PirateApp {
 	public void postInit() { }
 	
 	@Override
-	public void render(RenderTarget target, RenderStates states, float delta) { }
+	public void render(RenderTarget target, RenderStates states, float delta) {
+		if (Keyboard.isKeyPressed(Key.ESCAPE)) {
+			this.close();
+		}
+	}
 
 	public static void main(String[] args) {
 		new MainTest(APP_NAME);

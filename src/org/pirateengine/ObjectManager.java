@@ -21,6 +21,12 @@ public final class ObjectManager {
 	private List<PirateObject> pirateObjects = new ArrayList<>();
 
 	/**
+	 * Die Objekte in dieser Liste können mit anderen kollisionsfähigen Objekten
+	 * kollidieren.
+	 */
+	private List<Integer> collidableObjects = new ArrayList<>();
+
+	/**
 	 * Temporäre Liste der zu zerstörenden Objekte
 	 */
 	private List<Integer> destroyedObjects = new ArrayList<>();
@@ -112,6 +118,45 @@ public final class ObjectManager {
 	}
 
 	/**
+	 * Legt fest, ob das gegebene Objekt mit anderen kollidierbaren Objekten
+	 * kollidieren kann.
+	 * 
+	 * @param objectId
+	 *            Das Objekt, das als kollidierbar oder nicht kollidierbar
+	 *            markiert werden soll.
+	 * @param isCollidable
+	 *            <code>true</code>, wenn das Objekt kollidierbar sein soll,
+	 *            <code>false</code> wenn nicht.
+	 */
+	public void setCollidable(int objectId, boolean isCollidable) {
+		if (objectId >= 0 && objectId <= this.idCounter) {
+			if (isCollidable) {
+				this.collidableObjects.add(objectId);
+			} else {
+				// Wir müssen den int zu einem Integer konvertieren, da sonst
+				// der Index anstatt des Objektes gelöscht wird.
+				this.collidableObjects.remove(new Integer(objectId));
+			}
+		} else {
+			throw new PirateException("Invalid ObjectID: " + objectId);
+		}
+	}
+
+	/**
+	 * Prüft, ob das angegebene Objekt mit anderen kollidieren kann.
+	 * 
+	 * @param id
+	 *            Die ID des zu prüfenden Objektes
+	 * @return <code>true</code> wenn es kollidierbar ist, <code>false</code>
+	 *         wenn nicht.
+	 */
+	public boolean isCollidable(int id) {
+		// Wir brauchen wieder einen Integer, damit wir das Objekt abfragen
+		// können, anstatt des Indexes.
+		return this.collidableObjects.contains(new Integer(id));
+	}
+
+	/**
 	 * Gibt die zugrunde liegende {@link PirateApp} zurück.
 	 * 
 	 * @return Die {@link PirateApp} halt ... -.-"
@@ -194,6 +239,11 @@ public final class ObjectManager {
 	public void update() {
 		// Der Garbage Collector des ObjectManagers
 		this.garbage();
+
+		/**
+		 * Führt die Kollisionen durch.
+		 */
+		this.checkCollisions();
 	}
 
 	/**
@@ -222,6 +272,31 @@ public final class ObjectManager {
 				Integer currentID = ids.next();
 				if (hasDestroyedFlag(currentID)) {
 					ids.remove();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Prüft alle kollisionsfähigen Objekte, ob eine Kollision stattfindet und
+	 * leitet diese an die betroffenen Objekte zurück.
+	 */
+	private void checkCollisions() {
+		// Erstmal holen wir uns alle kollisionsfähigen Objekte.
+		Iterator<Integer> collidableObjects = this.collidableObjects.iterator();
+		
+		// Diese gehen wir dann der Reihe nach durch ...
+		while (collidableObjects.hasNext()) {
+			PirateObject collidableObject = this.getById(collidableObjects.next());
+			
+			// ... und vergleichen sie untereinander.
+			Iterator<Integer> otherCollidables = this.collidableObjects.iterator();
+			while (otherCollidables.hasNext()) {
+				PirateObject otherCollidable = this.getById(collidableObjects.next());
+				
+				// Natürlich darf nicht ein und dasselbe Objekt "miteinander" verglichen werden.
+				if (collidableObject.getId() != otherCollidable.getId()) {
+					// TODO PirateObjects haben noch keine Position und Größe
 				}
 			}
 		}
