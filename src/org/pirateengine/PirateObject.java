@@ -1,5 +1,8 @@
 package org.pirateengine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jsfml.graphics.Drawable;
 import org.jsfml.graphics.RenderStates;
 import org.jsfml.graphics.RenderTarget;
@@ -32,6 +35,11 @@ public abstract class PirateObject implements Drawable {
 	 * Referenz zur zugrunde liegenden {@link PirateApp}
 	 */
 	private PirateApp app;
+	
+	/**
+	 * Liste der {@link PirateModule}s, die an dieses Objekt angehangen sind
+	 */
+	private List<PirateModule> modules = new ArrayList<>();
 
 	/**
 	 * Initialisiert dieses {@link PirateObject} Diese Methode darf nur einmal
@@ -141,26 +149,13 @@ public abstract class PirateObject implements Drawable {
 	public PirateApp getApp() {
 		return this.app;
 	}
-
+	
 	/**
-	 * Legt fest, ob dieses Objekt mit anderen kollidierbaren Objekten
-	 * kollidieren soll.
 	 * 
-	 * @param isCollidable
-	 *            <code>true</code>, wenn dieses Objekt kollidierbar sein soll,
-	 *            <code>false</code> wenn nicht.
+	 * @param type
 	 */
-	public void setCollidable(boolean isCollidable) {
-		this.objectManager.setCollidable(this.id, isCollidable);
-	}
-
-	/**
-	 * Gibt zurück, ob dieses Objekt mit anderen Objekten kollidieren kann.
-	 * 
-	 * @return
-	 */
-	public boolean isCollidable() {
-		return this.objectManager.isCollidable(this.id);
+	public void getModule(Class<PirateModule> type) {
+		
 	}
 
 	@Override
